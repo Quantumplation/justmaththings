@@ -281,6 +281,7 @@ function renderBox() {
         horizSliceWidth * horizFrac.numerator - hgap, vertSliceHeight * (vertFrac.denominator - vertFrac.numerator) - vgap
     )) {
         horizFrac.numeratorHover = true;
+        vgap = 0;
         cursor();
     }
     if(isHover(
@@ -288,6 +289,7 @@ function renderBox() {
         horizSliceWidth * (horizFrac.denominator - horizFrac.numerator) - hgap, vertSliceHeight * vertFrac.numerator - vgap
     )) {
         vertFrac.numeratorHover = true;
+        hgap = 0;
         cursor();
     }
 
@@ -296,6 +298,7 @@ function renderBox() {
             const l = leftBorder + x * horizSliceWidth;
             const t = topBorder + y * vertSliceHeight;
             let f = 'white';
+            let secondaryFill = 'white';
             if(horizFrac.denominatorHover) {
                 if(horizFrac.denominatorDrag && x < horizFrac.numerator && y < vertFrac.numerator) {
                     f = soln.numeratorColor({ numeratorHover: true });
