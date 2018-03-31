@@ -69,44 +69,45 @@ class Fraction {
         const th = this.height() / 2;
         const hh = th / 2;
 
-        if(this.anyDrag()) {
-            let ySign = 0;
-            if(this.numeratorDrag) {
-                ySign = -1;
-                fill(this.numeratorColor(this));
-            } else {
-                ySign = 1;
-                fill(this.denominatorColor(this));
-            }
-            if(this.dragStartDir === "horizontal") {
-                // LEFT
-                triangle(
-                    x - (tw / 2),     y + ySign * (3 * th / 4),
-                    x - (tw / 2),     y + ySign * (th / 4),
-                    x - (3 * tw / 4), y + ySign * (th / 2)
-                );
-                // RIGHT
-                triangle(
-                    x + (tw / 2),     y + ySign * (3 * th / 4),
-                    x + (tw / 2),     y + ySign * (th / 4),
-                    x + (3 * tw / 4), y + ySign * (th / 2)
-                );
-            } else {
-                // UP
-                triangle(
-                    x - (tw / 2),     y + ySign * (th / 2),
-                    x - tw,           y + ySign * (th / 2),
-                    x - (3 * tw / 4), y + ySign * (th / 4)
-                );
-                // DOWN
-                triangle(
-                    x + (tw / 2),     y + ySign * (th / 2),
-                    x + tw,           y + ySign * (th / 2),
-                    x + (3 * tw / 4), y + ySign * (3 * th / 4)
-                );
+        if(this.draggable) {
+            for(let ySign = -1; ySign <= 1; ySign += 2) {
+                if(ySign == -1 && this.numeratorDrag) {
+                    fill(this.numeratorColor(this));
+                } else if(ySign == 1 && this.denominatorDrag) {
+                    fill(this.denominatorColor(this));
+                } else {
+                    fill(100, 100, 100);
+                }
+                const chevronOffset = tw + 20;
+                if(this.direction === "horizontal") {
+                    // LEFT
+                    triangle(
+                        x - (chevronOffset / 2),     y + ySign * (3 * th / 4),
+                        x - (chevronOffset / 2),     y + ySign * (th / 4),
+                        x - (3 * chevronOffset / 4), y + ySign * (th / 2)
+                    );
+                    // RIGHT
+                    triangle(
+                        x + (chevronOffset / 2),     y + ySign * (3 * th / 4),
+                        x + (chevronOffset / 2),     y + ySign * (th / 4),
+                        x + (3 * chevronOffset / 4), y + ySign * (th / 2)
+                    );
+                } else {
+                    // UP
+                    triangle(
+                        x - (chevronOffset / 2),     y + ySign * (th / 2),
+                        x - chevronOffset,           y + ySign * (th / 2),
+                        x - (3 * chevronOffset / 4), y + ySign * (th / 4)
+                    );
+                    // DOWN
+                    triangle(
+                        x + (chevronOffset / 2),     y + ySign * (th / 2),
+                        x + chevronOffset,           y + ySign * (th / 2),
+                        x + (3 * chevronOffset / 4), y + ySign * (3 * th / 4)
+                    );
+                }
             }
         }
-
     
         fill(this.numeratorColor(this));
         text(this.numerator, x, y - (th / 2));
@@ -161,6 +162,8 @@ class Fraction {
                 this.dragStartX = mouseX;
                 this.dragStartY = mouseY;
             }
+            this.numeratorHover = this.numeratorHover || this.denominatorHover;
+            this.denominatorHover = this.denominatorHover || this.numeratorHover;
         }
     }
 
@@ -182,7 +185,7 @@ class Fraction {
     }
 }
 
-let debug = true;
+let debug = false;
 
 function computeWH() {
     let w = window.innerWidth;
@@ -250,115 +253,184 @@ function renderBox() {
     horizFrac.direction = "horizontal";
     vertFrac.direction = "vertical";
 
-    const gap = 10;
+    const gap = 30;
     const horizSlices = horizFrac.denominator;
     const horizSliceWidth = rectWidth / horizSlices;
     const vertSlices = vertFrac.denominator;
     const vertSliceHeight = rectHeight / vertSlices;
 
+    let stripeHoriz = true;
+    let stripeVert = true;
+    let stripeSolution = true;
+    
+    let primaryColor = soln.denominatorColor({ denominatorHover: true });
 
     noStroke();
     let hgap = gap;
     let vgap = gap;
 
+    if(horizFrac.anyDrag() || horizFrac.anyHover()) {
+        primaryColor = horizFrac.denominatorColor({ denominatorHover: true });
+        stripeSolution = false;
+        stripeVert = false;
+    }
+    if(vertFrac.anyDrag() || vertFrac.anyHover()) {
+        primaryColor = vertFrac.denominatorColor({ denominatorHover: true });
+        stripeSolution = false;
+        stripeHoriz = false;
+    }
+
     if(!anyDrag()) {
-        if(horizFrac.numeratorHover || horizFrac.denominatorHover) {
-            vgap = 0;
+        if(soln.anyHover()) {
+            stripeHoriz = false;
+            stripeVert = false;
         }
-        if(vertFrac.numeratorHover || vertFrac.denominatorHover) {
-            hgap = 0;
+        if(horizFrac.anyHover()) {
+            vgap = -1;
+        }
+        if(vertFrac.anyHover()) {
+            hgap = -1;
         }
     }
 
-    if(isHover(
-        leftBorder, topBorder, 
-        horizSliceWidth * horizFrac.numerator - hgap, vertSliceHeight * vertFrac.numerator - vgap
-    )) {
-        soln.numeratorHover = true;
-    }
-    if(isHover(
-        leftBorder, topBorder + vertSliceHeight * vertFrac.numerator, 
-        horizSliceWidth * horizFrac.numerator - hgap, vertSliceHeight * (vertFrac.denominator - vertFrac.numerator) - vgap
-    )) {
-        horizFrac.numeratorHover = true;
-        vgap = 0;
-        cursor();
-    }
-    if(isHover(
-        leftBorder + horizSliceWidth * horizFrac.numerator, topBorder, 
-        horizSliceWidth * (horizFrac.denominator - horizFrac.numerator) - hgap, vertSliceHeight * vertFrac.numerator - vgap
-    )) {
-        vertFrac.numeratorHover = true;
-        hgap = 0;
-        cursor();
-    }
-
-    for(let x = 0; x < horizSlices; x++) {
-        for(let y = 0; y < vertSlices; y++) {
-            const l = leftBorder + x * horizSliceWidth;
-            const t = topBorder + y * vertSliceHeight;
-            let f = 'white';
-            let secondaryFill = 'white';
-            if(horizFrac.denominatorHover) {
-                if(horizFrac.denominatorDrag && x < horizFrac.numerator && y < vertFrac.numerator) {
-                    f = soln.numeratorColor({ numeratorHover: true });
-                } else {
-                    f = horizFrac.denominatorColor(horizFrac);
-                }
-            } else if(vertFrac.denominatorHover) {
-                if(vertFrac.denominatorDrag && x < horizFrac.numerator && y < vertFrac.numerator) {
-                    f = soln.numeratorColor({ numeratorHover: true });
-                } else {
-                    f = vertFrac.denominatorColor(vertFrac);
-                }
-            } else if(soln.denominatorHover) {
-                f = soln.denominatorColor(soln);
-            } else {
-                if(horizFrac.numeratorHover) {
-                    if(x < horizFrac.numerator) {
-                        if(y < vertFrac.numerator && (horizFrac.numeratorDrag || vertFrac.numeratorDrag)) {
-                            f = soln.numeratorColor({ numeratorHover: true });
-                        } else {
-                            f = horizFrac.numeratorColor(horizFrac);
-                        }
-                    } else {
-                        f = horizFrac.denominatorColor({ denominatorHover: true });
-                    }
-                } else if(vertFrac.numeratorHover) {
-                    if(y < vertFrac.numerator) {
-                        if(x < horizFrac.numerator && (horizFrac.numeratorDrag || vertFrac.numeratorDrag)) {
-                            f = soln.numeratorColor({ numeratorHover: true });
-                        } else {
-                            f = vertFrac.numeratorColor(vertFrac);
-                        }
-                    } else {
-                        f = vertFrac.denominatorColor({ denominatorHover: true });
-                    }
-                } else {
-                    if(x < horizFrac.numerator) {
-                        if(y < vertFrac.numerator) {
-                            f = soln.numeratorColor({ numeratorHover: true });
-                        } else if(soln.numeratorHover) {
-                            f = soln.denominatorColor({ denominatorHover: true });
-                        } else {
-                            f = horizFrac.numeratorColor({ numeratorHover: true });
-                        }
-                    } else {
-                        if(soln.numeratorHover) {
-                            f = soln.denominatorColor({ denominatorHover: true });
-                        } else if(y < vertFrac.numerator) {
-                            f = vertFrac.numeratorColor({ numeratorHover: true });
-                        } else {
-                            f = soln.denominatorColor({ denominatorHover: true });
-                        }
-                    }
-                }
-            }
-            fill(f);
-            rect(l, t, horizSliceWidth - hgap, vertSliceHeight - vgap);
+    if(!anyDrag()) {
+        if(isHover(
+            leftBorder, topBorder, 
+            horizSliceWidth * horizFrac.numerator - hgap, vertSliceHeight * vertFrac.numerator - vgap
+        )) {
+            stripeSolution = true;
+            stripeHoriz = false;
+            stripeVert = false;
+        }
+        if(isHover(
+            leftBorder, topBorder + vertSliceHeight * vertFrac.numerator, 
+            horizSliceWidth * horizFrac.numerator - hgap, vertSliceHeight * (vertFrac.denominator - vertFrac.numerator) - vgap
+        )) {
+            vgap = -1;
+            primaryColor = horizFrac.denominatorColor({ denominatorHover: true });
+            stripeHoriz = true;
+            stripeVert = false;
+            stripeSolution = false;
+        }
+        if(isHover(
+            leftBorder + horizSliceWidth * horizFrac.numerator, topBorder, 
+            horizSliceWidth * (horizFrac.denominator - horizFrac.numerator) - hgap, vertSliceHeight * vertFrac.numerator - vgap
+        )) {
+            hgap = -1;
+            primaryColor = vertFrac.denominatorColor({ denominatorHover: true });
+            stripeVert = true;
+            stripeHoriz = false;
+            stripeSolution = false;
         }
     }
+
+    fill(primaryColor);
+    rect(leftBorder, topBorder, rectWidth, rectHeight);
+
+    let stripeWidth = 70, stripeGap = 50;
+
+    if(stripeHoriz) {
+        let secondaryColor = horizFrac.numeratorColor({ numeratorHover: true });
+        fill(secondaryColor);
+        stripeRegion(
+            leftBorder, topBorder,
+            horizSliceWidth * horizFrac.numerator,
+            vertSliceHeight * vertFrac.denominator,
+            stripeWidth, stripeGap
+        );
+    }
+
+    if(stripeVert) {
+        fill(vertFrac.numeratorColor({ numeratorHover: true }));
+        stripeRegion(
+            leftBorder, topBorder,
+            horizSliceWidth * horizFrac.denominator,
+            vertSliceHeight * vertFrac.numerator,
+            stripeWidth, stripeGap
+        );    
+    }
+
+    if(stripeSolution) {
+        fill(soln.numeratorColor({ numeratorHover: true }));
+        stripeRegion(
+            leftBorder, topBorder,
+            horizSliceWidth * horizFrac.numerator,
+            vertSliceHeight * vertFrac.numerator,
+            stripeWidth, stripeGap
+        );
+    }
+    
+    fill("#2c3e50");
+    for(let x = 1; x < horizFrac.denominator; x++) {
+        let left = leftBorder + x * horizSliceWidth - hgap;
+        rect(left, topBorder, hgap + 1, rectHeight);
+    }
+    for(let x = 1; x < vertFrac.denominator; x++) {
+        let top = topBorder + x * vertSliceHeight - vgap;
+        rect(leftBorder, top, rectWidth, vgap + 1);
+    }
+
     pop();
+}
+
+function stripeRegion(left, top, boxWidth, boxHeight, stripeWidth, stripeGap) {
+    const stripeStride = stripeWidth + stripeGap;
+    for(let c = 0; c < 100; c++) {
+        const stripeAX = Math.min(c * stripeStride, boxWidth);
+        const stripeAY = c * stripeStride - stripeAX;
+
+        const stripeBX = Math.min(stripeAX + stripeWidth, boxWidth);
+        const stripeBY = c * stripeStride - stripeBX + stripeWidth;
+
+        const stripeCY = Math.min(c * stripeStride, boxHeight);
+        const stripeCX = c * stripeStride - stripeCY;
+
+        const stripeDY = Math.min(stripeCY + stripeWidth, boxHeight);
+        const stripeDX = c * stripeStride - stripeDY + stripeWidth;
+
+        if(stripeAY > boxHeight || stripeBY > boxHeight || stripeCX > boxWidth || stripeDX > boxWidth) {
+            break;
+        }
+        quad(
+            left + stripeAX,
+            top + stripeAY,
+
+            left + stripeBX,
+            top + stripeBY,
+
+            left + stripeDX,
+            top + stripeDY,
+            
+            left + stripeCX,
+            top + stripeCY,
+        );
+
+        // Fill in corner triangles
+        if(stripeAY !== stripeBY) {
+            triangle(
+                left + stripeAX,
+                top + stripeAY,
+
+                left + boxWidth,
+                top,
+
+                left + stripeBX,
+                top + stripeBY,
+            );
+        }
+        if(stripeCY !== stripeDY) {
+            triangle(
+                left + stripeDX,
+                top + stripeDY,
+
+                left,
+                top + boxHeight,
+
+                left + stripeCX,
+                top + stripeCY,
+            );
+        }
+    }
 }
 
 function interactiveRegion(x, y, width, height) {
