@@ -240,6 +240,17 @@ function draw() {
     soln.draw();
 }
 
+
+const gap = 30;
+let currentHGap = gap, currentVGap = gap;
+let targetHGap = currentHGap, targetVGap = currentVGap;
+
+const stripeWidth = 70, stripeGap = 70;
+let solnStripeWidth = stripeWidth, targetSolnStripeWidth = stripeWidth;
+let horizStripeWidth = stripeWidth, targetHorizStripeWidth = stripeWidth;
+let vertStripeWidth = stripeWidth, targetVertStripeWidth = stripeWidth;
+
+
 function renderBox() {
     push();
     const horizontalMargin = 20;
@@ -255,127 +266,139 @@ function renderBox() {
     horizFrac.direction = "horizontal";
     vertFrac.direction = "vertical";
 
-    const gap = 30;
     const horizSlices = horizFrac.denominator;
     const horizSliceWidth = rectWidth / horizSlices;
     const vertSlices = vertFrac.denominator;
     const vertSliceHeight = rectHeight / vertSlices;
 
-    let stripeHoriz = true;
-    let stripeVert = true;
-    let stripeSolution = true;
+    targetHorizStripeWidth = stripeWidth;
+    targetVertStripeWidth = stripeWidth;
+    targetSolnStripeWidth = stripeWidth;
     
     let primaryColor = soln.denominatorColor({ denominatorHover: true });
 
     noStroke();
-    let hgap = gap;
-    let vgap = gap;
 
     if(horizFrac.anyDrag() || horizFrac.anyHover()) {
         primaryColor = horizFrac.denominatorColor({ denominatorHover: true });
-        stripeSolution = false;
-        stripeVert = false;
+        targetHorizStripeWidth = stripeWidth;
+        targetSolnStripeWidth = 0;
+        targetVertStripeWidth = 0;
     }
     if(vertFrac.anyDrag() || vertFrac.anyHover()) {
         primaryColor = vertFrac.denominatorColor({ denominatorHover: true });
-        stripeSolution = false;
-        stripeHoriz = false;
+        targetVertStripeWidth = stripeWidth;
+        targetSolnStripeWidth = 0;
+        targetHorizStripeWidth = 0;
     }
+
+    targetHGap = gap;
+    targetVGap = gap;
 
     if(!anyDrag()) {
         if(soln.anyHover()) {
-            stripeHoriz = false;
-            stripeVert = false;
+            targetSolnStripeWidth = stripeWidth;
+            targetHorizStripeWidth = 0;
+            targetVertStripeWidth = 0;
         }
         if(horizFrac.anyHover()) {
-            vgap = -1;
+            targetVGap = 0;
         }
         if(vertFrac.anyHover()) {
-            hgap = -1;
+            targetHGap = 0;
         }
     }
 
     if(!anyDrag()) {
         if(isHover(
             leftBorder, topBorder, 
-            horizSliceWidth * horizFrac.numerator - hgap, vertSliceHeight * vertFrac.numerator - vgap
+            horizSliceWidth * horizFrac.numerator - currentHGap, vertSliceHeight * vertFrac.numerator - currentVGap
         )) {
             soln.forceHover = true;
-            stripeSolution = true;
-            stripeHoriz = false;
-            stripeVert = false;
+            targetSolnStripeWidth = stripeWidth;
+            targetHorizStripeWidth = 0;
+            targetVertStripeWidth = 0;
         }
         if(isHover(
             leftBorder, topBorder + vertSliceHeight * vertFrac.numerator, 
-            horizSliceWidth * horizFrac.numerator - hgap, vertSliceHeight * (vertFrac.denominator - vertFrac.numerator) - vgap
+            horizSliceWidth * horizFrac.numerator - currentHGap, vertSliceHeight * (vertFrac.denominator - vertFrac.numerator) - currentVGap
         )) {
-            vgap = -1;
+            targetVGap = 0;
             primaryColor = horizFrac.denominatorColor({ denominatorHover: true });
             horizFrac.forceHover = true;
-            stripeHoriz = true;
-            stripeVert = false;
-            stripeSolution = false;
+            targetSolnStripeWidth = 0;
+            targetHorizStripeWidth = stripeWidth;
+            targetVertStripeWidth = 0;
         }
         if(isHover(
             leftBorder + horizSliceWidth * horizFrac.numerator, topBorder, 
-            horizSliceWidth * (horizFrac.denominator - horizFrac.numerator) - hgap, vertSliceHeight * vertFrac.numerator - vgap
+            horizSliceWidth * (horizFrac.denominator - horizFrac.numerator) - currentHGap, vertSliceHeight * vertFrac.numerator - currentVGap
         )) {
-            hgap = -1;
+            targetHGap = 0;
             primaryColor = vertFrac.denominatorColor({ denominatorHover: true });
             vertFrac.forceHover = true;
-            stripeVert = true;
-            stripeHoriz = false;
-            stripeSolution = false;
+            targetSolnStripeWidth = 0;
+            targetHorizStripeWidth = 0;
+            targetVertStripeWidth = stripeWidth;
         }
     }
 
     fill(primaryColor);
     rect(leftBorder, topBorder, rectWidth, rectHeight);
 
-    let stripeWidth = 70, stripeGap = 50;
+    let secondaryColor = horizFrac.numeratorColor({ numeratorHover: true });
+    fill(secondaryColor);
+    stripeRegion(
+        leftBorder, topBorder,
+        horizSliceWidth * horizFrac.numerator,
+        vertSliceHeight * vertFrac.denominator,
+        horizStripeWidth, stripeGap + (stripeWidth - horizStripeWidth)
+    );
 
-    if(stripeHoriz) {
-        let secondaryColor = horizFrac.numeratorColor({ numeratorHover: true });
-        fill(secondaryColor);
-        stripeRegion(
-            leftBorder, topBorder,
-            horizSliceWidth * horizFrac.numerator,
-            vertSliceHeight * vertFrac.denominator,
-            stripeWidth, stripeGap
-        );
-    }
+    fill(vertFrac.numeratorColor({ numeratorHover: true }));
+    stripeRegion(
+        leftBorder, topBorder,
+        horizSliceWidth * horizFrac.denominator,
+        vertSliceHeight * vertFrac.numerator,
+        vertStripeWidth, stripeGap + (stripeWidth - vertStripeWidth)
+    );    
 
-    if(stripeVert) {
-        fill(vertFrac.numeratorColor({ numeratorHover: true }));
-        stripeRegion(
-            leftBorder, topBorder,
-            horizSliceWidth * horizFrac.denominator,
-            vertSliceHeight * vertFrac.numerator,
-            stripeWidth, stripeGap
-        );    
-    }
+    fill(soln.numeratorColor({ numeratorHover: true }));
+    stripeRegion(
+        leftBorder, topBorder,
+        horizSliceWidth * horizFrac.numerator,
+        vertSliceHeight * vertFrac.numerator,
+        solnStripeWidth, stripeGap + (stripeWidth - solnStripeWidth)
+    );
 
-    if(stripeSolution) {
-        fill(soln.numeratorColor({ numeratorHover: true }));
-        stripeRegion(
-            leftBorder, topBorder,
-            horizSliceWidth * horizFrac.numerator,
-            vertSliceHeight * vertFrac.numerator,
-            stripeWidth, stripeGap
-        );
-    }
+    const animationRate = 12;
+    currentHGap = animateTowards(currentHGap, targetHGap, animationRate);
+    currentVGap = animateTowards(currentVGap, targetVGap, animationRate);
+
+    solnStripeWidth = animateTowards(solnStripeWidth, targetSolnStripeWidth, animationRate);
+    horizStripeWidth = animateTowards(horizStripeWidth, targetHorizStripeWidth, animationRate);
+    vertStripeWidth = animateTowards(vertStripeWidth, targetVertStripeWidth, animationRate);
     
     fill("#2c3e50");
     for(let x = 1; x < horizFrac.denominator; x++) {
-        let left = leftBorder + x * horizSliceWidth - hgap;
-        rect(left, topBorder, hgap + 1, rectHeight);
+        let left = leftBorder + x * horizSliceWidth - currentHGap;
+        rect(left, topBorder, currentHGap, rectHeight);
     }
     for(let x = 1; x < vertFrac.denominator; x++) {
-        let top = topBorder + x * vertSliceHeight - vgap;
-        rect(leftBorder, top, rectWidth, vgap + 1);
+        let top = topBorder + x * vertSliceHeight - currentVGap;
+        rect(leftBorder, top, rectWidth, currentVGap);
     }
 
     pop();
+}
+
+function animateTowards(current, target, speed) {
+    if(current < target) {
+        return Math.min(current + speed, target);
+    } else if(current > target) {
+        return Math.max(current - speed, target);
+    }
+    return current;
 }
 
 function stripeRegion(left, top, boxWidth, boxHeight, stripeWidth, stripeGap) {
