@@ -18,11 +18,11 @@ function setup() {
 
     left = new Fraction(1, 3, true, {
         numeratorColor: (t) => sharedColor("#f1c40f", t.numeratorHover),
-        denominatorColor: (t) => sharedColor("#e74c3c", t.denominatorHover),
+        denominatorColor: (t) => sharedColor("#c0392b", t.denominatorHover),
     });
     right = new Fraction(2, 5, true, {
-        numeratorColor: (t) => sharedColor("#3498db", t.numeratorHover),
-        denominatorColor: (t) => sharedColor("#2ecc71", t.denominatorHover),
+        numeratorColor: (t) => sharedColor("#2ecc71", t.numeratorHover),
+        denominatorColor: (t) => sharedColor("#2980b9", t.denominatorHover),
     });
     soln = new Fraction(3, 15, false, {
         numeratorColor: (t) => sharedColor("#8e44ad", t.numeratorHover),
