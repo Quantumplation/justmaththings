@@ -45,6 +45,7 @@ class Fraction {
         this.numeratorDrag = false;
         this.denominatorHover = false;
         this.denominatorDrag = false;
+        this.forceHover = false;
         this.numeratorColor = colorFns.numeratorColor;
         this.denominatorColor = colorFns.denominatorColor;
         this.anyHover = this.anyHover.bind(this);
@@ -55,7 +56,7 @@ class Fraction {
     }
 
     anyDrag() { return this.numeratorDrag || this.denominatorDrag };
-    anyHover() { return this.numeratorHover || this.denominatorHover };
+    anyHover() { return this.numeratorHover || this.denominatorHover || this.forceHover };
 
     draw() {
         push();
@@ -162,8 +163,9 @@ class Fraction {
                 this.dragStartX = mouseX;
                 this.dragStartY = mouseY;
             }
-            this.numeratorHover = this.numeratorHover || this.denominatorHover;
-            this.denominatorHover = this.denominatorHover || this.numeratorHover;
+            this.numeratorHover = this.anyHover();
+            this.denominatorHover = this.anyHover();
+            this.forceHover = false;
         }
     }
 
@@ -298,6 +300,7 @@ function renderBox() {
             leftBorder, topBorder, 
             horizSliceWidth * horizFrac.numerator - hgap, vertSliceHeight * vertFrac.numerator - vgap
         )) {
+            soln.forceHover = true;
             stripeSolution = true;
             stripeHoriz = false;
             stripeVert = false;
@@ -308,6 +311,7 @@ function renderBox() {
         )) {
             vgap = -1;
             primaryColor = horizFrac.denominatorColor({ denominatorHover: true });
+            horizFrac.forceHover = true;
             stripeHoriz = true;
             stripeVert = false;
             stripeSolution = false;
@@ -318,6 +322,7 @@ function renderBox() {
         )) {
             hgap = -1;
             primaryColor = vertFrac.denominatorColor({ denominatorHover: true });
+            vertFrac.forceHover = true;
             stripeVert = true;
             stripeHoriz = false;
             stripeSolution = false;
