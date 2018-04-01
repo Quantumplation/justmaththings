@@ -17,16 +17,16 @@ function setup() {
     let center = w / 2;
 
     left = new Fraction(1, 3, true, {
-        numeratorColor: (t) => sharedColor("#eb3b5a", t.numeratorHover),
-        denominatorColor: (t) => sharedColor("#fa8231", t.denominatorHover),
+        numeratorColor: (t) => sharedColor("#f1c40f", t.numeratorHover),
+        denominatorColor: (t) => sharedColor("#e74c3c", t.denominatorHover),
     });
     right = new Fraction(2, 5, true, {
-        numeratorColor: (t) => sharedColor("#3867d6", t.numeratorHover),
-        denominatorColor: (t) => sharedColor("#0fb9b1", t.denominatorHover),
+        numeratorColor: (t) => sharedColor("#3498db", t.numeratorHover),
+        denominatorColor: (t) => sharedColor("#2ecc71", t.denominatorHover),
     });
     soln = new Fraction(3, 15, false, {
-        numeratorColor: (t) => sharedColor("#8854d0", t.numeratorHover),
-        denominatorColor: (t) => sharedColor("#20bf6b", t.denominatorHover),
+        numeratorColor: (t) => sharedColor("#8e44ad", t.numeratorHover),
+        denominatorColor: (t) => sharedColor("#7f8c8d", t.denominatorHover),
     });
 
     windowResized();
