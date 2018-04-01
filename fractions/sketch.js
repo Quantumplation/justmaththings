@@ -344,21 +344,21 @@ function renderBox() {
     }
 
     fill(primaryColor);
-    rect(leftBorder, topBorder, rectWidth, rectHeight);
+    rect(leftBorder, topBorder, rectWidth - (gap / 2), rectHeight - (gap / 2));
 
     let secondaryColor = horizFrac.numeratorColor({ numeratorHover: true });
     fill(secondaryColor);
     stripeRegion(
         leftBorder, topBorder,
         horizSliceWidth * horizFrac.numerator,
-        vertSliceHeight * vertFrac.denominator,
+        vertSliceHeight * vertFrac.denominator - (gap / 2),
         horizStripeWidth, stripeGap + (stripeWidth - horizStripeWidth)
     );
 
     fill(vertFrac.numeratorColor({ numeratorHover: true }));
     stripeRegion(
         leftBorder, topBorder,
-        horizSliceWidth * horizFrac.denominator,
+        horizSliceWidth * horizFrac.denominator - (gap / 2),
         vertSliceHeight * vertFrac.numerator,
         vertStripeWidth, stripeGap + (stripeWidth - vertStripeWidth)
     );    
@@ -381,12 +381,12 @@ function renderBox() {
     
     fill("#2c3e50");
     for(let x = 1; x < horizFrac.denominator; x++) {
-        let left = leftBorder + x * horizSliceWidth - currentHGap;
-        rect(left, topBorder, currentHGap, rectHeight);
+        let left = leftBorder + x * horizSliceWidth - (currentHGap / 2);
+        rect(left, topBorder, currentHGap / 2, rectHeight);
     }
     for(let x = 1; x < vertFrac.denominator; x++) {
-        let top = topBorder + x * vertSliceHeight - currentVGap;
-        rect(leftBorder, top, rectWidth, currentVGap);
+        let top = topBorder + x * vertSliceHeight - (currentVGap / 2);
+        rect(leftBorder, top, rectWidth, currentVGap / 2);
     }
 
     pop();
